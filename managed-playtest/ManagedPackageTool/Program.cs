@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using Utils.Framework.ManagedExtensions;
@@ -14,21 +15,31 @@ internal static class Program
         try
         {
             var options=new Dictionary<string,string>(); var files=new Dictionary<string,byte[]>(); var declarations=new List<object>(); var modules=new List<object>();
+            var host=new List<ManagedAssemblyIdentity>(); var metadataInputs=new List<ManagedAssemblyMetadata>();
             if(args.Length%2!=0) throw new ArgumentException("Expected option/value pairs.");
             for(int i=0;i<args.Length;i+=2)
             {
+                if(args[i]=="--host-assembly") { host.Add(ManagedAssemblyIdentity.FromAssemblyName(AssemblyName.GetAssemblyName(args[i+1]))); continue; }
                 if(args[i]!="--assembly") { options.Add(args[i],args[i+1]); continue; }
                 using(var input=File.OpenRead(args[i+1]))
                 {
                     if(input.Length<1 || input.Length>ManagedExtensionManifestReader.MaxFileBytes) throw new ArgumentException("Assembly size limit.");
                     byte[] bytes=new byte[(int)input.Length]; input.ReadExactly(bytes); var metadata=ManagedExtensionMetadataReader.Read(bytes); var a=metadata.Identity;
+                    metadataInputs.Add(metadata);
                     string path="Assemblies/"+a.Name+".dll"; files.Add(path,bytes);
                     declarations.Add(new {name=a.Name,version=a.Version,culture=a.Culture,publicKeyToken=a.PublicKeyToken,path,length=bytes.Length,sha256=ManagedExtensionPaths.Hash(bytes)});
                     foreach(var module in metadata.Modules) modules.Add(new {id=module.Id,assemblyName=a.Name,entryType=module.EntryType,dependsOn=module.DependsOn});
                 }
             }
             string[] required={"--package-id","--name","--version","--output"};
-            if(required.Any(k=>!options.ContainsKey(k)) || options.Keys.Any(k=>!required.Contains(k))) throw new ArgumentException("Use --assembly (repeatable), --package-id, --name, --version, --output.");
+            if(required.Any(k=>!options.ContainsKey(k)) || options.Keys.Any(k=>!required.Contains(k))) throw new ArgumentException("Use --assembly and optional --host-assembly (repeatable), --package-id, --name, --version, --output.");
+            if(host.Count!=0)
+            {
+                var available=metadataInputs.Select(a=>a.Identity).Concat(host).Select(a=>a.FullName).Distinct(StringComparer.Ordinal).ToList();
+                foreach(var reference in metadataInputs.SelectMany(a=>a.References))
+                    if(!available.Contains(reference.FullName,StringComparer.Ordinal))
+                        throw new ArgumentException("Unavailable exact CLR reference: "+reference.FullName+"; supplied identities: "+string.Join("; ",host.Where(a=>a.Name==reference.Name).Select(a=>a.FullName)));
+            }
             byte[] manifest=JsonSerializer.SerializeToUtf8Bytes(new {schemaVersion=1,management="phinix-dll",packageId=options["--package-id"],name=options["--name"],version=options["--version"],targetFramework="net472",
                 compatibility=new {rimWorldVersions=new[]{"1.6"},phinixRange=">=0.9.7 <1.0.0",abstractionsRange=">=1.6.0 <2.0.0"},dependencies=new object[0],externalMods=new object[0],resources=new object[0],assemblies=declarations,modules});
             var parsed=ManagedExtensionManifestReader.Read(manifest); ManagedExtensionPayloadInspector.Inspect(parsed,files,CancellationToken.None);

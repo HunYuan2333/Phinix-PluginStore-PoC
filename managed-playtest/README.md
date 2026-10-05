@@ -1,7 +1,11 @@
-Managed DLL Playtest 1.2.0
+# Managed Playtest 1.2.1
 
-Phinix discovers this module outside RimWorld Mods. One public main-tab provider, persistent click count, and a confirmed 100-silver action on a loaded test map. Package has only manifest.json and its own net472 DLL. Framework/game assemblies are supplied by the host. Disable/uninstall applies at next startup; data remains in host settings.
+Source and packaging-tool source for the Phinix managed DLL test. Build inside a Phinix-Rework checkout (RimWorld 1.6 / Phinix 0.9.7 / client abstractions 1.6.0). Do not bundle host, framework, Unity or game DLLs. This folder is a source snapshot; its project references require the full checkout or an explicit PhinixRoot.
 
-托管 DLL 测试包：仅包含清单和自身 DLL，不创建 Mod。商店安装后重启，验证 Tab、持久点击计数、100 白银；停用和卸载在重启生效，计数保留。请使用测试存档。
+1.2.1 fixes the sample reference build: Assembly-CSharp 1.6.9676.18020, replacing the obsolete 1.6.9438.37837 reference in 1.2.0. Override GameReferences when building the sample to point at the intended game Managed directory; never infer a match from the major/minor label alone. These game files are compiler inputs only and are not published.
 
-Build with -p:PhinixRoot=/absolute/path/to/Phinix-Rework. The current package was built and statically inspected against the matching Phinix 0.9.7 / ClientExtensionAbstractions 1.6.0 host.
+Install from phinix.managed on the staging store and restart. Its registered tab offers a persistent click counter and a confirmed 100-silver action for test saves. Disable/uninstall take effect at restart; settings remain after removal. No separate RimWorld mod shell is used.
+
+ManagedPackageTool accepts repeated --assembly and optional repeated --host-assembly paths. When host identities are supplied, every external CLR reference must match exactly before any ZIP is written. Supply the intended game mscorlib/Assembly-CSharp/Unity modules and the actual Utils/ClientExtensionAbstractions DLLs. This checks static compatibility, not runtime activation or arbitrary plugin safety.
+
+The old 1.2.0 release remains immutable. New assets use new version/tag/digests; no overwrite is permitted.
