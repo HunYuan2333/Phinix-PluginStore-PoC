@@ -4,7 +4,7 @@ Test-only managed DLL plugin for RimWorld 1.6 and the Phinix development host wi
 
 The plugin registers a visible test tab, retains a click counter, and grants 100 silver only after confirmation in a test map. English and Simplified Chinese JSON files drive tab/button/confirmation/result text through the generic host localization service. Other game languages fall back to supplied English. The store is not required for translations after installation.
 
-Install v1.3.0 from the phinix.managed staging source. Remove any manually copied Playtest folder or earlier loose/local-Mod copy and restart first; two copies of the same module are not supported. Installation, enable/disable and uninstall take effect after a full restart. Uninstall retains settings and save data.
+This is a standalone developer fixture, excluded from the official plugin index. Use the bundled-folder method below for developer testing; there is no player-facing test source. Remove any manually copied Playtest folder or earlier loose/local-Mod copy and restart first; two copies of the same module are not supported. Installation, enable/disable and uninstall take effect after a full restart. Uninstall retains settings and save data.
 
 The ZIP has manifest.json, Assemblies/Phinix.Store.Playtest.dll and Resources/Localization/en-US.json plus zh-CN.json. Managed downloads are installed into a package-owned folder under SaveData/Phinix/ManagedExtensions/packages. The manifest verifies lengths and SHA-256 of DLL and language resources. No game or host DLLs are shipped.
 
@@ -30,4 +30,4 @@ Run the packager with --assembly, --package-id phinix.poc.playtest, --name, --ve
 3. Check that language switching preserves the counter, and disabling the store does not disable plugin translations.
 4. Check Playtest disable/re-enable and uninstall across restarts; verify that its tab disappears while settings/save data remain.
 
-These tests complement static/runtime checks; compilation does not prove in-game behavior. Catalog v3 multilingual store descriptions and direct GitHub client access are separate pending work. This test release uses the current catalog v2 publication chain.
+These tests complement static/runtime checks; compilation does not prove in-game behavior. The official index and GitHub/CF adapters are separate infrastructure. This fixture is intentionally not an official store listing. Release v1.3.0 and its original asset/tag/sourceCommit remain unchanged.

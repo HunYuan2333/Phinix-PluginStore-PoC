@@ -1,9 +1,7 @@
-# Phinix Plugin Store controlled PoC
+# Phinix Store Playtest
 
-This public repository contains an **inert distribution test**, not an approved production extension or the official plugin index. `phinix.poc` is a separate source. The official index and game mod remain unchanged.
+[中文](README.zh-CN.md). Standalone developer fixture for the Phinix managed extension framework. Only the latest Playtest 1.3.0 release is retained. It is intentionally absent from the official plugin index; there is no player-facing test repository selector.
 
-`PocMarker.cs` declares one net472 assembly, `Phinix.Store.Poc` version `1.0.0.0`. It has no initializer, game hook, networking, storage, installation scripts or Phinix module. The ZIP contains About metadata, a manifest and that assembly. It is only for a controlled gateway/checksum test; it has not passed in-game loading or installation acceptance.
+The plugin provides a test tab, persistent click counter, confirmed 100-silver action and English/Chinese localization. Use a disposable test save. [Source, build, folder installation and checks](managed-playtest/README.md). [Latest fixed release](https://github.com/HunYuan2333/Phinix-PluginStore-PoC/releases/tag/v1.3.0).
 
-Build on Mono using `mcs -sdk:4.7.2 -target:library -out:/tmp/Phinix.Store.Poc.dll PocMarker.cs`. Binary output belongs in a GitHub Release, not Git source. A catalog release locks repository/owner/commit/tag/release/asset IDs and SHA-256; the published descriptor is committed before the stable pointer. No production approval or automatic publisher workflow is supplied here.
-
-The original source and metadata in this test repository are licensed under MIT. No RimWorld, Unity, host framework or third-party assemblies are distributed.
+The original v1.3.0 ZIP, tag and sourceCommit are immutable. Legacy local-Mod samples, obsolete catalogs and older releases have been removed from the current repository surface. Game/framework reference DLLs are not distributed.

@@ -1,9 +1,7 @@
-# Phinix 插件商店受控 PoC
+# Phinix Store Playtest
 
-这里是公开的**无行为分发测试**，不是正式批准扩展，也不是官方插件索引。测试来源 `phinix.poc` 与官方来源隔离，正式索引和游戏模组不变。
+[English](README.md)。独立的 Phinix 托管扩展开发测试插件，仅保留最新版 Playtest 1.3.0。它不出现在正式插件 index 中，也没有玩家可见的测试源选择器。
 
-`PocMarker.cs` 声明 net472 程序集 `Phinix.Store.Poc`，版本 `1.0.0.0`，没有初始化器、游戏 hook、网络、存储、安装脚本或 Phinix 模块。ZIP 仅含 About、manifest 和该程序集，用于 gateway/hash 验证，尚未通过游戏加载或安装验收。
+包含测试 Tab、持久计数、确认后添加 100 白银和中英文本地化。仅在测试存档中使用。[源码、构建、文件夹安装与验收](managed-playtest/README.zh-CN.md) · [固定版本发布](https://github.com/HunYuan2333/Phinix-PluginStore-PoC/releases/tag/v1.3.0)。
 
-Mono 构建：`mcs -sdk:4.7.2 -target:library -out:/tmp/Phinix.Store.Poc.dll PocMarker.cs`。二进制只上传 GitHub Release，不提交源码仓库。catalog Release 固定仓库/owner/commit/tag/release/asset ID 和 SHA-256；先提交 published，再更新 stable。本仓库不提供正式审批或自动发布流程。
-
-本测试原创源码和元数据使用 MIT 许可；不分发 RimWorld、Unity、宿主框架或第三方 DLL。
+原版 1.3.0 ZIP、标签和 sourceCommit 保持不变。旧本地 Mod 样例、过期目录与旧版本发布从当前仓库入口清理，不分发游戏/框架参考 DLL。
