@@ -17,7 +17,9 @@ namespace Phinix.Store.Playtest
         public void Register(IExtensionBuilder builder) { builder.RegisterApi<IMainTabProvider>(tab); }
         public void Activate(ExtensionHostContext hostContext)
         {
-            tab.Start(hostContext.Log);
+            hostContext.TryGetService<IClientSettingsContext>(out var settings);
+            var localization=hostContext.GetRequiredService<IClientLocalizationService>().ForModule(this);
+            tab.Start(hostContext.Log,settings,localization);
             hostContext.Log("Playtest: activated; registered tab through the public extension API.", LogLevel.INFO);
         }
         public void Shutdown(ExtensionHostContext hostContext)
@@ -31,13 +33,16 @@ namespace Phinix.Store.Playtest
     {
         private Action<string, LogLevel> log;
         private int clicks;
+        private IClientSettingsContext settings;
+        private IClientLocalizer localization;
         private bool active;
         private long generation;
         private string result;
         public string TabLabel => T("tab");
         public float TabOrder => 998f;
-        internal void Start(Action<string, LogLevel> sink) { Stop(); log = sink; active = true; }
-        internal void Stop() { active = false; clicks = 0; result = null; log = null; generation++; }
+        internal void Start(Action<string, LogLevel> sink,IClientSettingsContext context,IClientLocalizer localizer) { Stop(); log = sink; settings=context; localization=localizer; localization.LanguageChanged+=LanguageChanged; clicks=Math.Max(0,settings?.Get("playtest.clicks",0)??0); active = true; }
+        private void LanguageChanged() { log?.Invoke("Playtest: language changed; locale="+localization?.Locale,LogLevel.INFO); }
+        internal void Stop() { if(localization!=null) { localization.LanguageChanged-=LanguageChanged; localization.Dispose(); localization=null; } active = false; clicks = 0; result = null; log = null; settings=null; generation++; }
         public void Draw(Rect inRect)
         {
             if (!active || inRect.width <= 0 || inRect.height <= 0) return;
@@ -46,8 +51,8 @@ namespace Phinix.Store.Playtest
             {
                 Text.Font = GameFont.Small; Text.Anchor = TextAnchor.UpperLeft; Text.WordWrap = true; GUI.color = Color.white;
                 Widgets.Label(new Rect(inRect.x, inRect.y, inRect.width, 70), T("intro"));
-                if (Widgets.ButtonText(new Rect(inRect.x, inRect.y + 76, inRect.width, 32), T("click") + " (" + clicks + ")"))
-                { clicks++; log?.Invoke("Playtest: click count=" + clicks + ".", LogLevel.INFO); }
+                if (Widgets.ButtonText(new Rect(inRect.x, inRect.y + 76, inRect.width, 32), T("click") + " (" + localization.Format("count",clicks) + ")"))
+                { if(clicks<int.MaxValue) clicks++; settings?.Set("playtest.clicks",clicks); log?.Invoke("Playtest: click count=" + clicks + ".", LogLevel.INFO); }
                 GUI.enabled = enabled && Find.CurrentMap != null;
                 if (Widgets.ButtonText(new Rect(inRect.x, inRect.y + 114, inRect.width, 32), T("silver")))
                 {
@@ -77,6 +82,6 @@ namespace Phinix.Store.Playtest
             catch (Exception ex)
             { result = "failed"; log?.Invoke("Playtest: silver action failed; type=" + ex.GetType().Name + ".", LogLevel.WARNING); }
         }
-        private static string T(string key) => ("Phinix_playtest_" + key).Translate();
+        private string T(string key) { return localization?.Text(key)??key; }
     }
 }
